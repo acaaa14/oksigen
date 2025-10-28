@@ -1,0 +1,35 @@
+timestamp,tube_id,branch,action,notes,name,nik,phone,address,purpose,est_duration,return_date,foto_ktp,foto_selfie_ktp
+2025-10-05T17:37:06.137022,TUBE-Cempaka_Putih-001,Cempaka Putih,borrow,scan_method=upload,Rosita,20230803103,895330347429.0,Jakarta,sakit,3.0,2025-10-08,,
+2025-10-07T10:18:11.984608,TUBE-Cempaka_Putih-003,Cempaka Putih,borrow,scan_method=upload,thifaal jelek,38545575868,,,,,2025-10-07,,
+2025-10-07T10:19:49.723019,TUBE-Glodok-001,Glodok,borrow,scan_method=upload,thifaal,317236494449949947764646,8638462.0,jl.....,.....,2.0,2025-10-09,,
+2025-10-07T10:33:19.281294,TUBE-Pulogadung-001,Pulogadung,borrow,scan_method=webcam,aca,121313131,212121.0,tidak ada,ttiadka,12.0,2025-10-23,,
+2025-10-07 19:10:44,TUBE-Pulogadung-001,Pulogadung,borrow,auto-scanned,tipal,73958756,838454658.0,tidak ada,tidak ada,3.0,2025-10-09,,
+2025-10-07 19:12:18,TUBE-Pulogadung-001,Pulogadung,borrow,auto-scanned,thifaal jelek,947456585,87474874848.0,tidak ada,tidak ada,3.0,2025-10-09,,
+2025-10-15 15:43:20,TUBE-Glodok-002,Glodok,borrow,auto-scanned,,,,,,,2025-10-15,,
+2025-10-15 16:01:50,TUBE-Pulogadung-001,Pulogadung,borrow,auto-scanned,acaaa,947456585,87474874848.0,jl.mawar,tidak ada,3.0,2025-10-19,ktp_20251015_160150_TUBE-Pulogadung-001.jpg,selfie_20251015_160150_TUBE-Pulogadung-001.jpg
+2025-10-15 17:25:58,TUBE-Pulogadung-001,Pulogadung,borrow,auto-scanned,gi,,,,,,2025-10-15,ktp_20251015_172558_TUBE-Pulogadung-001.jpg,
+2025-10-15 17:29:13,TUBE-Cempaka_Putih-002,Cempaka Putih,borrow,auto-scanned,,,,,,,2025-10-15,ktp_20251015_172913_TUBE-Cempaka_Putih-002.jpg,selfie_20251015_172913_TUBE-Cempaka_Putih-002.jpg
+2025-10-15 17:32:53,TUBE-Cempaka_Putih-001,Cempaka Putih,borrow,auto-scanned,"Mira Setiawan
+Tempautgi Lahir",,,"Jl Pasti Cepat A7/66
+Rtrw 00700
+Kaldesa Pegadungan
+Kecamatan",,,2025-10-15,ktp_20251015_173253_TUBE-Cempaka_Putih-001.jpg,selfie_20251015_173253_TUBE-Cempaka_Putih-001.jpg
+2025-10-15 17:44:08,TUBE-Glodok-003,Glodok,borrow,auto-scanned,,,,,,,2025-10-15,ktp_20251015_174407_TUBE-Glodok-003.jpg,selfie_20251015_174407_TUBE-Glodok-003.jpg
+2025-10-15 17:54:27,TUBE-Glodok-003,Glodok,borrow,auto-scanned,Mira Setiawan Tempautgi Lahir,3171234567890123,,Jl Pasti Cepat A7/66,,,2025-10-15,ktp_20251015_175427_TUBE-Glodok-003.jpg,selfie_20251015_175427_TUBE-Glodok-003.jpg
+2025-10-15 18:04:35,TUBE-Kebayoran_Baru-001,Kebayoran Baru,borrow,auto-scanned,Mira Setiawan Tempautgi,3171234567890123,,"JL PASTI CEPAT A7/66, Dki Jakarta Jakarta Barat Nik",,,2025-10-15,ktp_20251015_180435_TUBE-Kebayoran_Baru-001.jpg,selfie_20251015_180435_TUBE-Kebayoran_Baru-001.jpg
+2025-10-15 18:15:15,TUBE-Glodok-001,Glodok,borrow,auto-scanned,,,,"Jl Pasti Cepat A7/66, Dki Jakarta Jakarta Barat Nik",,,2025-10-15,ktp_20251015_181515_TUBE-Glodok-001.jpg,selfie_20251015_181515_TUBE-Glodok-001.jpg
+2025-10-15 18:17:56,TUBE-Cempaka_Putih-002,Cempaka Putih,borrow,auto-scanned,"Mira Setiawan
+Tempautgi Lahir",,,"Jl Pasti Cepat A7/66
+Rtrw 00700
+Kaldesa Pegadungan
+Kecamatan",,,2025-10-15,ktp_20251015_181756_TUBE-Cempaka_Putih-002.jpg,selfie_20251015_181756_TUBE-Cempaka_Putih-002.jpg
+2025-10-15 18:24:11,TUBE-Cempaka_Putih-002,Cempaka Putih,borrow,auto-scanned,"Mira Setiawan
+Tempautgi Lahir",3171234567890123,,"Jl Pasti Cepat A7/66
+Rtrw 00700
+Kaldesa Pegadungan
+Kecamatan",,,2025-10-15,ktp_20251015_182411_TUBE-Cempaka_Putih-002.jpg,selfie_20251015_182411_TUBE-Cempaka_Putih-002.jpg
+2025-10-15 18:38:01,TUBE-Cempaka_Putih-002,Cempaka Putih,borrow,auto-scanned,"Mira Setiawan
+Tempautgi Lahir",3171234567890123,0857889999544,"Jl Pasti Cepat A7/66
+Rtrw 00700
+Kaldesa Pegadungan
+Kecamatan",tidak ada,3,2025-10-18,ktp_20251015_183801_TUBE-Cempaka_Putih-002.jpg,selfie_20251015_183801_TUBE-Cempaka_Putih-002.jpg
