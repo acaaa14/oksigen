@@ -1,5 +1,5 @@
 """
-Green O2 Exchange - Streamlit v4 (QR scanner + upload + form + OCR KTP)
+Green O2 Exchange - Streamlit v5 (Auto Reduce Capacity)
 ✅ QR scanner via webcam (auto-fill tube & branch)
 ✅ Upload QR image
 ✅ Auto form muncul setelah QR terbaca
@@ -7,6 +7,7 @@ Green O2 Exchange - Streamlit v4 (QR scanner + upload + form + OCR KTP)
 ✅ OCR otomatis dari foto KTP untuk auto-fill data diri (termasuk NIK)
 ✅ Data tersimpan ke data/borrow_log.csv
 ✅ Foto tersimpan di data/uploads/
+✅ Kapasitas cabang otomatis berkurang di branches.csv
 """
 
 import os
@@ -37,9 +38,9 @@ BORROW_LOG = os.path.join(DATA_DIR, "borrow_log.csv")
 BRANCHES_CSV = os.path.join(DATA_DIR, "branches.csv")
 
 # ---------------------------------
-# PYTESSERACT SETUP (penting!)
+# PYTESSERACT SETUP
 # ---------------------------------
-# Jika kamu di Windows, aktifkan baris di bawah ini dan sesuaikan path:
+# Jika kamu di Windows:
 # pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 # ---------------------------------
@@ -75,21 +76,44 @@ def parse_tube_branch_from_text(text: str):
     return None, None
 
 # ---------------------------------
-# OCR IMPROVED: BACA DATA DARI FOTO KTP
+# FUNGSI KURANGI KAPASITAS CABANG
+# ---------------------------------
+def reduce_branch_capacity(branch_name):
+    """Kurangi kapasitas cabang ketika ada peminjaman"""
+    try:
+        if not os.path.exists(BRANCHES_CSV):
+            return
+        df = pd.read_csv(BRANCHES_CSV)
+        if branch_name in df["branch"].values:
+            idx = df.index[df["branch"] == branch_name][0]
+            current_capacity = df.at[idx, "capacity"]
+            try:
+                current_capacity = int(current_capacity)
+            except ValueError:
+                current_capacity = 0
+            if current_capacity > 0:
+                df.at[idx, "capacity"] = current_capacity - 1
+                df.to_csv(BRANCHES_CSV, index=False)
+                st.info(f"📉 Kapasitas cabang '{branch_name}' berkurang menjadi {current_capacity - 1}.")
+            else:
+                st.warning(f"⚠️ Kapasitas cabang '{branch_name}' sudah habis!")
+        else:
+            st.warning(f"Cabang '{branch_name}' tidak ditemukan di branches.csv")
+    except Exception as e:
+        st.error(f"Gagal memperbarui kapasitas: {e}")
+
+# ---------------------------------
+# OCR: BACA DATA DARI FOTO KTP
 # ---------------------------------
 def extract_ktp_data(image: Image.Image):
-    """Ekstrak teks dari gambar KTP dan ambil data penting dengan regex yang lebih fleksibel."""
     try:
         arr = np.array(image)
-        # Jika gambar RGBA, convert dulu
         if arr.ndim == 3 and arr.shape[2] == 4:
             arr = cv2.cvtColor(arr, cv2.COLOR_RGBA2RGB)
         gray = cv2.cvtColor(arr, cv2.COLOR_RGB2GRAY)
     except Exception:
-        # fallback: gunakan PIL conversion
         gray = cv2.cvtColor(np.array(image.convert("RGB")), cv2.COLOR_RGB2GRAY)
 
-    # Preprocessing untuk meningkatkan hasil OCR
     try:
         gray = cv2.threshold(gray, 120, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     except Exception:
@@ -103,13 +127,9 @@ def extract_ktp_data(image: Image.Image):
     except Exception:
         text = pytesseract.image_to_string(gray, lang='eng')
 
-    # Bersihkan hasil OCR
     text_clean = re.sub(r'[\n\r]+', '\n', text).upper()
 
-    # Pola regex yang lebih toleran terhadap variasi OCR
-    # Coba beberapa pola NIK umum (16 digit)
     nik_match = re.search(r'([0-9]{16})', text_clean)
-    # Lebih aman: cari label NIK bila tersedia
     nik_label_match = re.search(r'N\s*I\s*K[:\s]*([0-9]{16})', text_clean)
     if nik_label_match:
         nik = nik_label_match.group(1).strip()
@@ -118,57 +138,41 @@ def extract_ktp_data(image: Image.Image):
     else:
         nik = ""
 
-    # Nama: cari baris yang diawali NAMA atau kata 'NAMA' lalu ambil sampai baris berikutnya
     nama_match = re.search(r'NAMA[:\s]*([A-Z\s\.]+)', text_clean)
     if not nama_match:
-        # alternatif cari baris 'NAMA' dan ambil baris berikutnya
         lines = text_clean.splitlines()
-        nama = ""
+        nama_val = ""
         for i, ln in enumerate(lines):
             if 'NAMA' in ln:
-                # ambil sisa setelah 'NAMA' atau baris selanjutnya
                 after = ln.split('NAMA', 1)[1].strip(": .")
                 if after:
-                    nama = after
+                    nama_val = after
                 elif i + 1 < len(lines):
-                    nama = lines[i + 1].strip()
+                    nama_val = lines[i + 1].strip()
                 break
-        if nama:
-            nama_val = nama
-        else:
-            nama_val = ""
     else:
         nama_val = nama_match.group(1).strip()
 
-    # Tempat/Tanggal Lahir
     ttl_match = re.search(r'TEMPAT[/\s]*TGL\s*LAHIR[:\s]*([A-Z0-9,\s\-\/\.]+)', text_clean)
     if not ttl_match:
         ttl_match = re.search(r'TTL[:\s]*([A-Z0-9,\s\-\/\.]+)', text_clean)
-
     ttl_val = ttl_match.group(1).strip() if ttl_match else ""
 
-    # Alamat
     alamat_match = re.search(r'ALAMAT[:\s]*([A-Z0-9\s,./\-]+)', text_clean)
     if not alamat_match:
-        # cari baris yang mengandung 'ALAMAT' lalu ambil beberapa baris berikutnya sampai ketemu kata kunci lain
         lines = text_clean.splitlines()
-        address = ""
+        alamat_val = ""
         for i, ln in enumerate(lines):
             if 'ALAMAT' in ln:
                 after = ln.split('ALAMAT', 1)[1].strip(": .")
                 if after:
-                    address = after
+                    alamat_val = after
                 else:
-                    # gabungkan beberapa baris berikutnya (maks 3 baris)
                     segs = []
                     for j in range(i+1, min(i+4, len(lines))):
-                        if any(k in lines[j] for k in ['RT', 'RW', 'KEL', 'KEC', 'KOTA', 'PROV']):
-                            segs.append(lines[j].strip())
-                        else:
-                            segs.append(lines[j].strip())
-                    address = " ".join([s for s in segs if s])
+                        segs.append(lines[j].strip())
+                    alamat_val = " ".join([s for s in segs if s])
                 break
-        alamat_val = address
     else:
         alamat_val = alamat_match.group(1).strip()
 
@@ -250,9 +254,7 @@ with col_scan:
 
     if ctx and ctx.state.playing:
         placeholder = st.empty()
-        # non-blocking check loop: gunakan state polling kecil
-        # NOTE: gunakan while singkat agar UI tidak hang.
-        for _ in range(50):  # cek beberapa kali saja
+        for _ in range(50):
             if ctx.video_transformer and getattr(ctx.video_transformer, "last_decoded", ""):
                 txt = ctx.video_transformer.last_decoded
                 if txt != st.session_state.last_scan:
@@ -304,10 +306,8 @@ if st.session_state.decoded_tube:
             foto_ktp = st.file_uploader("Unggah Foto KTP (otomatis dibaca OCR)", type=["jpg", "jpeg", "png"])
             foto_selfie = st.file_uploader("Unggah Foto Selfie dengan KTP", type=["jpg", "jpeg", "png"])
 
-            # default auto_data kosong
             auto_data = {"nik": "", "name": "", "address": ""}
 
-            # Jika ada upload, lakukan OCR dan assign ke auto_data sebelum render input fields
             if foto_ktp:
                 st.image(foto_ktp, caption="Preview KTP", width=250)
                 try:
@@ -316,7 +316,6 @@ if st.session_state.decoded_tube:
                 except Exception as e:
                     extracted = {"nik": "", "name": "", "address": "", "raw_text": f"Error: {e}"}
 
-                # Override auto_data supaya input berikutnya mendapat value otomatis
                 auto_data["nik"] = extracted.get("nik", "") or ""
                 auto_data["name"] = extracted.get("name", "") or ""
                 auto_data["address"] = extracted.get("address", "") or ""
@@ -328,7 +327,6 @@ if st.session_state.decoded_tube:
                 else:
                     st.warning("⚠️ Tidak bisa membaca teks dari KTP, isi manual.")
 
-            # Sekarang render field-field yang diisi otomatis jika tersedia
             name = st.text_input("Nama Peminjam", value=auto_data["name"])
             nik = st.text_input("NIK", value=auto_data["nik"])
             phone = st.text_input("Nomor Telepon")
@@ -354,7 +352,6 @@ if st.session_state.decoded_tube:
                     image.save(save_path)
                     return filename
                 except Exception:
-                    # jika gagal simpan image, coba simpan bytes
                     try:
                         with open(save_path, "wb") as f:
                             f.write(file.getbuffer())
@@ -384,8 +381,8 @@ if st.session_state.decoded_tube:
 
             try:
                 log_borrow_row(row)
-                st.success("✅ Data peminjaman tersimpan dengan OCR & foto.")
-                # reset decoded agar form tidak muncul lagi
+                reduce_branch_capacity(branch)
+                st.success("✅ Data peminjaman tersimpan & kapasitas cabang diperbarui.")
                 st.session_state.decoded_tube = ""
                 st.session_state.decoded_branch = ""
             except Exception as e:
